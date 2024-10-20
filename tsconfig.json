@@ -19,9 +19,9 @@
 		"noFallthroughCasesInSwitch": false,
 		"resolveJsonModule": true,
 		"paths": {
-			"@auth/*": ["./src/modules/auth/*"],
-			"@vendors/*": ["./src/modules/vendors/*"],
-			"@jobs/*": ["./src/modules/jobs/*"],
+			"@products/*": ["./src/app/modules/products/*"],
+			"@categories/*": ["./src/app/modules/categories/*"],
+			"@stocks/*": ["./src/app/modules/stocks/*"],
 			"@shared/*": ["./src/shared/*"]
 		}
 	}
