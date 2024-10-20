@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("DB_URL")
+}
+
+model Category {
+	id 					String 		@id()
+	name 				String
+	createdAt 	DateTime 	@map("created_at") @default(now())
+	updatedAt 	DateTime? @map("updated_at") @updatedAt
+	deletedAt 	DateTime?	@map("deleted_at")
+
+	CategorieToProduct CategoryToProduct[]
+
+	@@map("categories")
+}
+
+model Product {
+	id 					String 		@id()
+	name 				String
+	price 			Decimal 	@db.Money
+	createdAt 	DateTime 	@map("created_at") @default(now())
+	updatedAt 	DateTime? @map("updated_at") @updatedAt
+	deletedAt 	DateTime?	@map("deleted_at")
+
+	StockMovement StockMovement[]
+	CategorieToProduct CategoryToProduct[]
+
+	@@map("products")
+}
+
+model CategoryToProduct {
+	id 					String 		@id()
+	categoryId 	String
+	productId 	String
+	createdAt 	DateTime 	@map("created_at") @default(now())
+	updatedAt 	DateTime? @map("updated_at") @updatedAt
+	deletedAt 	DateTime?	@map("deleted_at")
+
+	category 	Category 	@relation(fields: [categoryId], references: [id])
+	product 	Product 	@relation(fields: [productId], 	references: [id])
+
+	@@map("categories_to_products")
+}
+
+model StockMovement {
+	id 					String 		@id()
+	productId 	String
+	type 				String
+	quantity 		Int
+	date 				DateTime 	@default(now())
+	description String
+
+	Product Product @relation(fields: [productId], references: [id])
+
+	@@map("stock_movements")
+}
