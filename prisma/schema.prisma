@@ -23,6 +23,7 @@ model Product {
 	id 					String 		@id()
 	name 				String
 	price 			Decimal 	@db.Money
+	quantity		Int				@default(0)
 	createdAt 	DateTime 	@map("created_at") @default(now())
 	updatedAt 	DateTime? @map("updated_at") @updatedAt
 	deletedAt 	DateTime?	@map("deleted_at")
