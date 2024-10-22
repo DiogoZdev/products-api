@@ -1,7 +1,7 @@
 import { CategoryDTO } from "@categories/domain/entities/category.entity";
 import { CreateCategoryUseCase } from "@categories/domain/use-cases/create-category.use-case";
 import { GetCategoriesUseCase } from "@categories/domain/use-cases/get-categories.use-case";
-import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 
 @Controller({
 	path: "categories",

@@ -1,5 +1,5 @@
 import { IList } from "@shared/interfaces/list.interface";
-import { ICategory } from "../../domain/entities/category.entity";
+import { ICategory } from "@categories/domain/entities/category.entity";
 
 export abstract class CategoriesRepository {
 	abstract createCategory(input: ICategory): Promise<ICategory>

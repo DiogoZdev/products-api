@@ -1,8 +1,8 @@
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { PrismaService } from "@shared/services/prisma.service";
 import { CategoriesRepository } from "./categories.repository";
 import { ICategory } from "@categories/domain/entities/category.entity";
 import { generateId } from "@shared/utils/generate-id.util";
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { IList } from "@shared/interfaces/list.interface";
 
 @Injectable()
@@ -11,17 +11,15 @@ export class PrismaCategoriesRepository implements CategoriesRepository {
 
 	async createCategory(input: ICategory): Promise<ICategory> {
 		try {
-
 			const exists = await this.prisma.category.findFirst({
 				where: {
 					name: input.name,
 					deletedAt: null
-
 				}
 			})
 
 			if (exists) {
-				return new HttpException(`Category "${input.name}" already exists`, HttpStatus.CONFLICT);
+				throw new HttpException(`Category "${input.name}" already exists`, HttpStatus.CONFLICT);
 			}
 
 			const res = await this.prisma.category.create({
@@ -36,7 +34,7 @@ export class PrismaCategoriesRepository implements CategoriesRepository {
 		catch (e) {
 			console.error(e)
 
-			throw new Error("An error occurred saving the category");
+			return e
 		}
 	}
 
