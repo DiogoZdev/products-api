@@ -34,7 +34,7 @@ export class PrismaProductsRepository implements ProductsRepository {
 					quantity,
 				},
 				include: {
-					CategorieToProduct: {
+					CategoryToProduct: {
 						select: {
 							categoryId: true
 						}
@@ -95,7 +95,7 @@ export class PrismaProductsRepository implements ProductsRepository {
 					take: take ?? 10,
 					skip: (page - 1) * take,
 					include: {
-						CategorieToProduct: {
+						CategoryToProduct: {
 							select: {
 								categoryId: true
 							}
@@ -108,7 +108,7 @@ export class PrismaProductsRepository implements ProductsRepository {
 			return {
 				data: data.map(p => {
 					return {
-						categories: p.CategorieToProduct.map(c => c.categoryId),
+						categories: p.CategoryToProduct.map(c => c.categoryId),
 						name: p.name,
 						price: Number(p.price),
 						quantity: Number(p.quantity),
@@ -131,7 +131,7 @@ export class PrismaProductsRepository implements ProductsRepository {
 				deletedAt: null
 			},
 			include: {
-				CategorieToProduct: {
+				CategoryToProduct: {
 					select: {
 						categoryId: true
 					}
@@ -144,7 +144,7 @@ export class PrismaProductsRepository implements ProductsRepository {
 		}
 
 		return {
-			categories: product.CategorieToProduct.map(c => c.categoryId),
+			categories: product.CategoryToProduct.map(c => c.categoryId),
 			name: product.name,
 			price: Number(product.price),
 			quantity: Number(product.quantity),
@@ -196,7 +196,7 @@ export class PrismaProductsRepository implements ProductsRepository {
 					price,
 				},
 				include: {
-					CategorieToProduct: {
+					CategoryToProduct: {
 						select: {
 							categoryId: true
 						}
@@ -244,7 +244,7 @@ export class PrismaProductsRepository implements ProductsRepository {
 				price: Number(updatedProduct.price),
 				categories: updatedCategories.length
 					? updatedCategories
-					: updatedProduct.CategorieToProduct.map(c => c.categoryId),
+					: updatedProduct.CategoryToProduct.map(c => c.categoryId),
 			}
 		}
 		catch (e) {

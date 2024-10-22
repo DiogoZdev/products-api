@@ -14,7 +14,7 @@ model Category {
 	updatedAt 	DateTime? @map("updated_at") @updatedAt
 	deletedAt 	DateTime?	@map("deleted_at")
 
-	CategorieToProduct CategoryToProduct[]
+	CategoryToProduct CategoryToProduct[]
 
 	@@map("categories")
 }
@@ -29,7 +29,7 @@ model Product {
 	deletedAt 	DateTime?	@map("deleted_at")
 
 	StockMovement StockMovement[]
-	CategorieToProduct CategoryToProduct[]
+	CategoryToProduct CategoryToProduct[]
 
 	@@map("products")
 }
