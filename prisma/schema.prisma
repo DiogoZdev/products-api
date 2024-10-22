@@ -23,13 +23,13 @@ model Product {
 	id 					String 		@id()
 	name 				String
 	price 			Decimal 	@db.Money
-	quantity		Int				@default(0)
 	createdAt 	DateTime 	@map("created_at") @default(now())
 	updatedAt 	DateTime? @map("updated_at") @updatedAt
 	deletedAt 	DateTime?	@map("deleted_at")
 
 	StockMovement StockMovement[]
 	CategoryToProduct CategoryToProduct[]
+	Stock Stock?
 
 	@@map("products")
 }
@@ -46,6 +46,19 @@ model CategoryToProduct {
 	product 	Product 	@relation(fields: [productId], 	references: [id])
 
 	@@map("categories_to_products")
+}
+
+model Stock {
+	id					String 		@id()
+	productId		String		@map("product_id") @unique
+	quantity		Int
+	createdAt 	DateTime 	@map("created_at") @default(now())
+	updatedAt 	DateTime? @map("updated_at") @updatedAt
+	deletedAt 	DateTime?	@map("deleted_at")
+
+	Product Product @relation(fields:[productId], references: [id])
+
+	@@map("stocks")
 }
 
 model StockMovement {
