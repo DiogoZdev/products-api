@@ -4,6 +4,7 @@ import { PrismaService } from "@shared/services/prisma.service";
 import { generateId } from "@shared/utils/generate-id.util";
 import { IProduct } from "@products/domain/entities/product.entity";
 import { IList } from "@shared/interfaces/list.interface";
+import { StockMovementTypeEnum } from "@stocks/domain/entities/stock-movement.entity";
 
 @Injectable()
 export class PrismaProductsRepository implements ProductsRepository {
@@ -11,66 +12,99 @@ export class PrismaProductsRepository implements ProductsRepository {
 
 	async createProduct(input: IProduct): Promise<IProduct> {
 		try {
-			const exists = await this.prisma.product.findFirst({
+			const productExists = await this.prisma.product.findFirst({
 				where: {
-					name: input.name,
+					name: {
+						equals: input.name,
+						mode: 'insensitive'
+					},
 					price: input.price,
 					deletedAt: null
-				}
+				},
 			})
 
-			if (exists) {
+			if (productExists) {
 				throw new HttpException(`Product "${input.name}" already exists`, HttpStatus.CONFLICT);
 			}
 
 			const { categories, name, price, quantity } = input
-
 			const productId = generateId()
-			const res = await this.prisma.product.create({
-				data: {
-					id: productId,
-					name,
-					price,
-					quantity,
-				},
-				include: {
-					CategoryToProduct: {
-						select: {
-							categoryId: true
+			const existingCategories: string[] = []
+
+			const newProduct = await this.prisma.$transaction(async (tx) => {
+				const createdProduct = await tx.product.create({
+					data: {
+						id: productId,
+						name,
+						price,
+					},
+					include: {
+						CategoryToProduct: {
+							select: {
+								categoryId: true
+							}
+						},
+						Stock: {
+							select: {
+								quantity: true,
+							}
 						}
 					}
+				});
+
+				for (const category of categories) {
+
+					const categoryExists = await tx.category.findFirst({
+						where: {
+							id: category,
+							deletedAt: null
+						}
+					})
+
+
+					if (categoryExists) {
+						existingCategories.push(category)
+
+						await tx.categoryToProduct.create({
+							data: {
+								id: generateId(),
+								categoryId: category,
+								productId,
+							}
+						})
+					}
 				}
-			});
 
-			const existingCategories = [];
-
-			for (const category of categories) {
-
-				const exists = await this.prisma.category.findFirst({
-					where: {
-						id: category,
-						deletedAt: null
+				await tx.stockMovement.create({
+					data: {
+						id: generateId(),
+						productId,
+						type: StockMovementTypeEnum.ENTRY,
+						description: 'Adding new product',
+						quantity,
+						date: new Date()
 					}
 				})
 
-				if (!exists) {
-					existingCategories.push(category)
+				await tx.stock.create({
+					data: {
+						id: generateId(),
+						productId,
+						quantity,
+					}
+				})
 
-					await this.prisma.categoryToProduct.create({
-						data: {
-							id: generateId(),
-							categoryId: category,
-							productId,
-						}
-					})
+				return {
+					...createdProduct,
+					categories: existingCategories
 				}
-			}
+			})
 
 			return {
 				categories: existingCategories,
-				name: res.name,
-				price: Number(res.price),
-				quantity: Number(res.quantity),
+				name: newProduct.name,
+				price: Number(newProduct.price),
+				quantity,
 			}
 		}
 		catch (e) {
@@ -99,6 +133,11 @@ export class PrismaProductsRepository implements ProductsRepository {
 							select: {
 								categoryId: true
 							}
+						},
+						Stock: {
+							select: {
+								quantity: true,
+							}
 						}
 					}
 				}),
@@ -111,7 +150,7 @@ export class PrismaProductsRepository implements ProductsRepository {
 						categories: p.CategoryToProduct.map(c => c.categoryId),
 						name: p.name,
 						price: Number(p.price),
-						quantity: Number(p.quantity),
+						quantity: Number(p.Stock.quantity),
 					}
 				}),
 				count,
@@ -135,6 +174,11 @@ export class PrismaProductsRepository implements ProductsRepository {
 					select: {
 						categoryId: true
 					}
+				},
+				Stock: {
+					select: {
+						quantity: true,
+					}
 				}
 			}
 		})
@@ -147,7 +191,7 @@ export class PrismaProductsRepository implements ProductsRepository {
 			categories: product.CategoryToProduct.map(c => c.categoryId),
 			name: product.name,
 			price: Number(product.price),
-			quantity: Number(product.quantity),
+			quantity: Number(product.Stock.quantity),
 		}
 	}
 
@@ -200,6 +244,11 @@ export class PrismaProductsRepository implements ProductsRepository {
 						select: {
 							categoryId: true
 						}
+					},
+					Stock: {
+						select: {
+							quantity: true,
+						}
 					}
 				}
 			})
@@ -240,7 +289,7 @@ export class PrismaProductsRepository implements ProductsRepository {
 
 			return {
 				name: updatedProduct.name,
-				quantity: Number(updatedProduct.quantity),
+				quantity: Number(updatedProduct.Stock.quantity),
 				price: Number(updatedProduct.price),
 				categories: updatedCategories.length
 					? updatedCategories
