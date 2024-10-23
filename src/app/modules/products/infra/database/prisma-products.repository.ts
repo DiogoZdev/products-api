@@ -102,6 +102,7 @@ export class PrismaProductsRepository implements ProductsRepository {
 			});
 
 			return {
+				id: newProduct.id,
 				categories: existingCategories,
 				name: newProduct.name,
 				price: Number(newProduct.price),
