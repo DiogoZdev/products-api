@@ -11,9 +11,7 @@
 git clone https://github.com/DiogoZdev/products-api
 ```
 
-## Install
-
-### Install dependencies
+## Install dependencies
 ```
 npm install
 ```
@@ -26,7 +24,7 @@ npm run test
 
 ## Execute the Project
 ```
-npm run start:local
+npm run compose:up
 ```
 - the database will be provided
 - the migrations will be applied
@@ -35,14 +33,14 @@ npm run start:local
 
 
 ### Access the project
-- OPen it `http://localhost:3000`
+- Open it `http://localhost:3000`
 - Read the docs `http://localhost:3000/api`
 - Check the execution `http://localhost:3000/health`
 
 
-Stop project
+## Stop the project
 ```
-npm run stop
+npm run compose:down
 ```
 
 ## Future improvements

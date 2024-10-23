@@ -12,7 +12,7 @@
 		"build": "nest build",
 		"format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
 		"start": "nest start --watch",
-		"start:local": "npm run database:init && npm run models:generate && nest start --watch",
+		"start:local": "npm run models:generate && nest start --watch",
 		"start:debug": "nest start --debug --watch",
 		"start:prod": "node dist/main",
 		"stop": "npm run compose:down",

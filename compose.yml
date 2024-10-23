@@ -17,3 +17,18 @@ services:
       interval: 2s
       timeout: 2s
       retries: 100
+
+  products_api:
+    build: .
+    container_name: products_api
+    env_file: .env
+    depends_on:
+      - postgres_dev
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: development
+
+networks:
+  default:
+    driver: bridge
