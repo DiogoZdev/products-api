@@ -4,7 +4,7 @@
 	"description": "",
 	"author": {
 		"name": "Diogo Lara",
-		"url": "https://github.com/diogodev/products-api"
+		"url": "https://github.com/diogozdev/products-api"
 	},
 	"private": true,
 	"license": "MIT",
@@ -12,7 +12,7 @@
 		"build": "nest build",
 		"format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
 		"start": "nest start --watch",
-		"start:dev": "npm run database:init && npm run models:generate && nest start --watch",
+		"start:local": "npm run database:init && npm run models:generate && nest start --watch",
 		"start:debug": "nest start --debug --watch",
 		"start:prod": "node dist/main",
 		"stop": "npm run compose:down",
@@ -27,9 +27,8 @@
 		"test:e2e": "jest --config ./test/jest-e2e.json",
 		"compose:up": "docker compose -f ./compose.yml up -d --wait",
 		"compose:down": "docker compose -f ./compose.yml down",
-		"database:init": "npm run compose:up && npm run database:migrate && npm run database:seed",
+		"database:init": "npm run compose:up && npm run database:migrate",
 		"database:migrate": "npx prisma migrate dev",
-		"database:seed": "ts-node ./prisma/seed.ts",
 		"models:generate": "npx prisma generate"
 	},
 	"dependencies": {
