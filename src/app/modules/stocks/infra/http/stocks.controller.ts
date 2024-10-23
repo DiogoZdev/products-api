@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { StockMovementDTO } from '@stocks/domain/entities/stock-movement.entity';
 import { AddStockMovementUseCase } from '@stocks/domain/use-cases/add-movement.use-case';
 import { GetStockMovementUseCase } from '@stocks/domain/use-cases/get-movements.use-case';
 import { GetStocksUseCase } from '@stocks/domain/use-cases/get-stocks.use-case';
+import { Response } from 'express';
 
 @Controller({ path: 'stocks' })
 export class StocksController {
@@ -13,17 +14,31 @@ export class StocksController {
 	) {}
 
 	@Get()
-	async getStocks(@Query() { category }: { category?: string }) {
-		const response = await this.getStocksUseCase.execute(category);
+	async getStocks(
+		@Query() { category }: { category?: string },
+		@Res() res: Response,
+	) {
+		try {
+			const response = await this.getStocksUseCase.execute(category);
 
-		return response;
+			return response;
+		} catch (err) {
+			return res.status(err.status).json(err);
+		}
 	}
 
 	@Post('/movements')
-	async createStockMovement(@Body() movement: StockMovementDTO) {
-		const response = await this.addStockMovementUseCase.execute(movement);
+	async createStockMovement(
+		@Body() movement: StockMovementDTO,
+		@Res() res: Response,
+	) {
+		try {
+			const response = await this.addStockMovementUseCase.execute(movement);
 
-		return response;
+			return response;
+		} catch (err) {
+			return res.status(err.status).json(err);
+		}
 	}
 
 	@Get('/movements')
@@ -38,13 +53,18 @@ export class StocksController {
 			take?: number;
 			category?: string;
 		},
+		@Res() res: Response,
 	) {
-		const response = await this.getStockMovementUseCase.execute({
-			page: Number(page),
-			take: Number(take),
-			category,
-		});
+		try {
+			const response = await this.getStockMovementUseCase.execute({
+				page: Number(page),
+				take: Number(take),
+				category,
+			});
 
-		return response;
+			return response;
+		} catch (err) {
+			return res.status(err.status).json(err);
+		}
 	}
 }

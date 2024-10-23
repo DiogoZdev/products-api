@@ -110,7 +110,7 @@ export class PrismaProductsRepository implements ProductsRepository {
 		} catch (err) {
 			console.error(err);
 
-			return err;
+			throw err;
 		}
 	}
 
@@ -224,7 +224,7 @@ export class PrismaProductsRepository implements ProductsRepository {
 		} catch (err) {
 			console.error(err);
 
-			return err;
+			throw err;
 		}
 	}
 
@@ -313,7 +313,7 @@ export class PrismaProductsRepository implements ProductsRepository {
 		} catch (err) {
 			console.error(err);
 
-			return err;
+			throw err;
 		}
 	}
 }

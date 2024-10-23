@@ -36,7 +36,7 @@ export class PrismaCategoriesRepository implements CategoriesRepository {
 		} catch (err) {
 			console.error(err);
 
-			return err;
+			throw err;
 		}
 	}
 

@@ -7,6 +7,7 @@ import {
 	Patch,
 	Post,
 	Query,
+	Res,
 } from '@nestjs/common';
 import { ProductDTO } from '@products/domain/entities/product.entity';
 import { CreateProductUseCase } from '@products/domain/use-cases/create-product.use-case';
@@ -14,6 +15,7 @@ import { DeleteProductByIdUseCase } from '@products/domain/use-cases/delete-prod
 import { GetProductsUseCase } from '@products/domain/use-cases/get-products.use-case';
 import { GetProductByIdUseCase } from '@products/domain/use-cases/get_product-by-id.use-case';
 import { UpdateProductUseCase } from '@products/domain/use-cases/update-product.use-case';
+import { Response } from 'express';
 
 @Controller({
 	path: '/products',
@@ -33,31 +35,56 @@ export class ProductsController {
 	}
 
 	@Get()
-	getProducts(@Query() query: { page?: number; take?: number }) {
-		const { page = 1, take = 10 } = query;
+	async getProducts(
+		@Query() { page = 1, take = 10 }: { page?: number; take?: number },
+		@Res() res: Response,
+	) {
+		try {
+			const response = await this.getProductsUseCase.execute({
+				page: Number(page),
+				take: Number(take),
+			});
 
-		return this.getProductsUseCase.execute({
-			page: Number(page),
-			take: Number(take),
-		});
+			return response;
+		} catch (err) {
+			return res.status(err.status).json(err);
+		}
 	}
 
 	@Get(':id')
-	async getProductsById(@Param('id') id: string) {
-		const res = this.getProductsByIdUseCase.execute(id);
-		return res;
+	async getProductsById(@Param('id') id: string, @Res() res: Response) {
+		try {
+			const response = this.getProductsByIdUseCase.execute(id);
+
+			return response;
+		} catch (err) {
+			return res.status(err.status).json(err);
+		}
 	}
 
 	@Delete(':id')
-	async deleteProduct(@Param('id') id: string) {
-		const res = await this.deleteProductUseCase.execute(id);
-		return res;
+	async deleteProduct(@Param('id') id: string, @Res() res: Response) {
+		try {
+			const res = await this.deleteProductUseCase.execute(id);
+
+			return res;
+		} catch (err) {
+			return res.status(err.status).json(err);
+		}
 	}
 
 	@Patch(':id')
-	async updateProduct(@Param('id') id: string, @Body() data: ProductDTO) {
-		const res = await this.updateProductUseCase.execute({ id, data });
+	async updateProduct(
+		@Param('id') id: string,
+		@Body() data: ProductDTO,
+		@Res() res: Response,
+	) {
+		try {
+			const res = await this.updateProductUseCase.execute({ id, data });
 
-		return res;
+			return res;
+		} catch (err) {
+			return res.status(err.status).json(err);
+		}
 	}
 }

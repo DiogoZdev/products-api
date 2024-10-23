@@ -69,7 +69,7 @@ export class PrismaStockRepository implements StockRepository {
 		} catch (err) {
 			console.error(err);
 
-			return err;
+			throw err;
 		}
 	}
 
@@ -135,7 +135,10 @@ export class PrismaStockRepository implements StockRepository {
 		} catch (err) {
 			console.error(err);
 
-			return err;
+			throw new HttpException(
+				'An error ocurred while trying to get stock movements',
+				HttpStatus.INTERNAL_SERVER_ERROR,
+			);
 		}
 	}
 
@@ -194,7 +197,10 @@ export class PrismaStockRepository implements StockRepository {
 		} catch (err) {
 			console.error(err);
 
-			return err;
+			throw new HttpException(
+				'An error ocurred while trying to get stocks',
+				HttpStatus.INTERNAL_SERVER_ERROR,
+			);
 		}
 	}
 }
