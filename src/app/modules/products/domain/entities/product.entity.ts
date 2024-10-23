@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsDefined, IsString, IsNumber, Length } from 'class-validator';
 
 export interface IProduct {
@@ -12,16 +13,19 @@ export interface IProduct {
 }
 
 export class ProductDTO implements IProduct {
+	@ApiProperty()
 	@IsDefined()
 	@IsString()
 	name: string;
 
+	@ApiProperty()
 	@IsDefined()
 	@IsNumber({
 		maxDecimalPlaces: 2,
 	})
 	price: number;
 
+	@ApiProperty()
 	@IsDefined()
 	@IsNumber({
 		maxDecimalPlaces: 0,
@@ -30,6 +34,7 @@ export class ProductDTO implements IProduct {
 	})
 	quantity: number;
 
+	@ApiProperty()
 	@IsDefined()
 	@IsString({ each: true })
 	@Length(1, 255, { each: true })

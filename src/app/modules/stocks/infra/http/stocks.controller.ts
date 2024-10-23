@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
+import { ApiBody, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { StockMovementDTO } from '@stocks/domain/entities/stock-movement.entity';
 import { AddStockMovementUseCase } from '@stocks/domain/use-cases/add-movement.use-case';
 import { GetStockMovementUseCase } from '@stocks/domain/use-cases/get-movements.use-case';
@@ -13,6 +14,8 @@ export class StocksController {
 		private readonly getStockMovementUseCase: GetStockMovementUseCase,
 	) {}
 
+	@ApiQuery({ name: 'category', required: false, example: 'electronics' })
+	@ApiResponse({ type: StockMovementDTO, isArray: true })
 	@Get()
 	async getStocks(
 		@Query() { category }: { category?: string },
@@ -27,6 +30,8 @@ export class StocksController {
 		}
 	}
 
+	@ApiBody({ type: StockMovementDTO, description: 'create Stock Movement' })
+	@ApiResponse({ type: StockMovementDTO })
 	@Post('/movements')
 	async createStockMovement(
 		@Body() movement: StockMovementDTO,
@@ -41,6 +46,10 @@ export class StocksController {
 		}
 	}
 
+	@ApiQuery({ name: 'category', required: false, example: 'electronics' })
+	@ApiQuery({ name: 'page', required: false, example: 1 })
+	@ApiQuery({ name: 'take', required: false, example: 10 })
+	@ApiResponse({ type: StockMovementDTO, isArray: true })
 	@Get('/movements')
 	async getStockMovements(
 		@Query()

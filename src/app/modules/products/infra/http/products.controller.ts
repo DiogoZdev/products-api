@@ -9,6 +9,7 @@ import {
 	Query,
 	Res,
 } from '@nestjs/common';
+import { ApiBody, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { ProductDTO } from '@products/domain/entities/product.entity';
 import { CreateProductUseCase } from '@products/domain/use-cases/create-product.use-case';
 import { DeleteProductByIdUseCase } from '@products/domain/use-cases/delete-product.use-case';
@@ -29,11 +30,31 @@ export class ProductsController {
 		private readonly updateProductUseCase: UpdateProductUseCase,
 	) {}
 
+	@ApiBody({
+		description: 'Create Product',
+		type: ProductDTO,
+	})
 	@Post()
 	createProduct(@Body() input: ProductDTO) {
 		return this.createProductUseCase.execute(input);
 	}
 
+	@ApiQuery({
+		name: 'page',
+		type: Number,
+		example: 1,
+	})
+	@ApiQuery({
+		name: 'take',
+		type: Number,
+		example: 10,
+	})
+	@ApiResponse({
+		description: 'Get products',
+		status: 200,
+		type: ProductDTO,
+		isArray: true,
+	})
 	@Get()
 	async getProducts(
 		@Query() { page = 1, take = 10 }: { page?: number; take?: number },
@@ -51,6 +72,12 @@ export class ProductsController {
 		}
 	}
 
+	@ApiParam({ name: 'id', type: String, example: '192B6A9B3B4' })
+	@ApiResponse({
+		description: 'Get product by id',
+		status: 200,
+		type: ProductDTO,
+	})
 	@Get(':id')
 	async getProductsById(@Param('id') id: string, @Res() res: Response) {
 		try {
@@ -62,6 +89,12 @@ export class ProductsController {
 		}
 	}
 
+	@ApiParam({ name: 'id', type: String, example: '192B6A9B3B4' })
+	@ApiResponse({
+		description: 'Delete product by id',
+		status: 200,
+		type: String,
+	})
 	@Delete(':id')
 	async deleteProduct(@Param('id') id: string, @Res() res: Response) {
 		try {
@@ -73,6 +106,16 @@ export class ProductsController {
 		}
 	}
 
+	@ApiParam({ name: 'id', type: String, example: '192B6A9B3B4' })
+	@ApiBody({
+		description: 'Update Product',
+		type: ProductDTO,
+	})
+	@ApiResponse({
+		description: 'Update product by id',
+		status: 200,
+		type: ProductDTO,
+	})
 	@Patch(':id')
 	async updateProduct(
 		@Param('id') id: string,

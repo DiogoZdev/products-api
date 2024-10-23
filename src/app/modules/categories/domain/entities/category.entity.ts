@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsDefined, IsString } from 'class-validator';
 
 export interface ICategory {
@@ -9,6 +10,7 @@ export interface ICategory {
 }
 
 export class CategoryDTO implements ICategory {
+	@ApiProperty()
 	@IsDefined()
 	@IsString()
 	name: string;

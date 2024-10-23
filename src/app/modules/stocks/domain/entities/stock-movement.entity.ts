@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsDefined, IsNumber, IsString } from 'class-validator';
 
 export enum StockMovementTypeEnum {
@@ -15,14 +16,17 @@ export interface ISotckMovement {
 }
 
 export class StockMovementDTO implements ISotckMovement {
+	@ApiProperty()
 	@IsDefined()
 	@IsString()
 	productId: string;
 
+	@ApiProperty()
 	@IsDefined()
 	@IsString()
 	type: StockMovementTypeEnum;
 
+	@ApiProperty()
 	@IsDefined()
 	@IsNumber({
 		maxDecimalPlaces: 0,
@@ -31,6 +35,7 @@ export class StockMovementDTO implements ISotckMovement {
 	})
 	quantity: number;
 
+	@ApiProperty()
 	@IsDefined()
 	@IsString()
 	description: string;
