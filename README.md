@@ -11,6 +11,9 @@
 git clone https://github.com/DiogoZdev/products-api
 ```
 
+## Define environment variables
+Rename the file `.env.example` to `.env`.
+
 ## Install dependencies
 ```
 npm install
