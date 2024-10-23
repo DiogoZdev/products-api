@@ -1,26 +1,24 @@
-import { Injectable } from "@nestjs/common";
-import { StockRepository } from "@stocks/infra/database/stock.repository";
+import { Injectable } from '@nestjs/common';
+import { StockRepository } from '@stocks/infra/database/stock.repository';
 
 @Injectable()
 export class GetStockMovementUseCase {
-	constructor(
-		private readonly stocksRepository: StockRepository
-	) { }
+	constructor(private readonly stocksRepository: StockRepository) {}
 
 	async execute({
 		page,
 		take,
-		category
+		category,
 	}: {
-		page?: number
-		take?: number
-		category?: string
+		page?: number;
+		take?: number;
+		category?: string;
 	}) {
 		const { data, count } = await this.stocksRepository.getStockMovements({
 			page,
 			take,
-			category
-		})
+			category,
+		});
 
 		return {
 			data,
@@ -30,7 +28,7 @@ export class GetStockMovementUseCase {
 				take,
 				previousPage: `/?page=${page === 1 ? 1 : page - 1}&take=${take}${category ? '&category=' + category : ''}`,
 				nextPage: `/?page=${page + 1}&take=${take}${category ? '&category=' + category : ''}`,
-			}
-		}
+			},
+		};
 	}
 }

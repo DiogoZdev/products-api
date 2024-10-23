@@ -1,14 +1,14 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { ProductsRepository } from "./products.repository";
-import { PrismaService } from "@shared/services/prisma.service";
-import { generateId } from "@shared/utils/generate-id.util";
-import { IProduct } from "@products/domain/entities/product.entity";
-import { IList } from "@shared/interfaces/list.interface";
-import { StockMovementTypeEnum } from "@stocks/domain/entities/stock-movement.entity";
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ProductsRepository } from './products.repository';
+import { PrismaService } from '@shared/services/prisma.service';
+import { generateId } from '@shared/utils/generate-id.util';
+import { IProduct } from '@products/domain/entities/product.entity';
+import { IList } from '@shared/interfaces/list.interface';
+import { StockMovementTypeEnum } from '@stocks/domain/entities/stock-movement.entity';
 
 @Injectable()
 export class PrismaProductsRepository implements ProductsRepository {
-	constructor(private readonly prisma: PrismaService) { }
+	constructor(private readonly prisma: PrismaService) {}
 
 	async createProduct(input: IProduct): Promise<IProduct> {
 		try {
@@ -16,20 +16,23 @@ export class PrismaProductsRepository implements ProductsRepository {
 				where: {
 					name: {
 						equals: input.name,
-						mode: 'insensitive'
+						mode: 'insensitive',
 					},
 					price: input.price,
-					deletedAt: null
+					deletedAt: null,
 				},
-			})
+			});
 
 			if (productExists) {
-				throw new HttpException(`Product "${input.name}" already exists`, HttpStatus.CONFLICT);
+				throw new HttpException(
+					`Product "${input.name}" already exists`,
+					HttpStatus.CONFLICT,
+				);
 			}
 
-			const { categories, name, price, quantity } = input
-			const productId = generateId()
-			const existingCategories: string[] = []
+			const { categories, name, price, quantity } = input;
+			const productId = generateId();
+			const existingCategories: string[] = [];
 
 			const newProduct = await this.prisma.$transaction(async (tx) => {
 				const createdProduct = await tx.product.create({
@@ -41,37 +44,35 @@ export class PrismaProductsRepository implements ProductsRepository {
 					include: {
 						CategoryToProduct: {
 							select: {
-								categoryId: true
-							}
+								categoryId: true,
+							},
 						},
 						Stock: {
 							select: {
 								quantity: true,
-							}
-						}
-					}
+							},
+						},
+					},
 				});
 
 				for (const category of categories) {
-
 					const categoryExists = await tx.category.findFirst({
 						where: {
 							id: category,
-							deletedAt: null
-						}
-					})
-
+							deletedAt: null,
+						},
+					});
 
 					if (categoryExists) {
-						existingCategories.push(category)
+						existingCategories.push(category);
 
 						await tx.categoryToProduct.create({
 							data: {
 								id: generateId(),
 								categoryId: category,
 								productId,
-							}
-						})
+							},
+						});
 					}
 				}
 
@@ -82,46 +83,48 @@ export class PrismaProductsRepository implements ProductsRepository {
 						type: StockMovementTypeEnum.ENTRY,
 						description: 'Adding new product',
 						quantity,
-						date: new Date()
-					}
-				})
+						date: new Date(),
+					},
+				});
 
 				await tx.stock.create({
 					data: {
 						id: generateId(),
 						productId,
 						quantity,
-					}
-				})
+					},
+				});
 
 				return {
 					...createdProduct,
-					categories: existingCategories
-				}
-			})
+					categories: existingCategories,
+				};
+			});
 
 			return {
 				categories: existingCategories,
 				name: newProduct.name,
 				price: Number(newProduct.price),
 				quantity,
-			}
-		}
-		catch (e) {
-			console.error(e)
+			};
+		} catch (err) {
+			console.error(err);
 
-			return e
+			return err;
 		}
 	}
 
 	async getProducts({
 		page,
 		take,
-	}: { page?: number, take?: number }): Promise<IList<IProduct>> {
+	}: {
+		page?: number;
+		take?: number;
+	}): Promise<IList<IProduct>> {
 		try {
 			const where = {
-				deletedAt: null
-			}
+				deletedAt: null,
+			};
 
 			const [data, count] = await Promise.all([
 				this.prisma.product.findMany({
@@ -131,35 +134,34 @@ export class PrismaProductsRepository implements ProductsRepository {
 					include: {
 						CategoryToProduct: {
 							select: {
-								categoryId: true
-							}
+								categoryId: true,
+							},
 						},
 						Stock: {
 							select: {
 								quantity: true,
-							}
-						}
-					}
+							},
+						},
+					},
 				}),
-				this.prisma.product.count({ where })
-			])
+				this.prisma.product.count({ where }),
+			]);
 
 			return {
-				data: data.map(p => {
+				data: data.map((p) => {
 					return {
-						categories: p.CategoryToProduct.map(c => c.categoryId),
+						categories: p.CategoryToProduct.map((c) => c.categoryId),
 						name: p.name,
 						price: Number(p.price),
 						quantity: Number(p.Stock.quantity),
-					}
+					};
 				}),
 				count,
-			}
-		}
-		catch (e) {
-			console.error(e)
+			};
+		} catch (err) {
+			console.error(err);
 
-			throw new Error("An error occurred getting the products");
+			throw new Error('An error occurred getting the products');
 		}
 	}
 
@@ -167,73 +169,87 @@ export class PrismaProductsRepository implements ProductsRepository {
 		const product = await this.prisma.product.findFirst({
 			where: {
 				id,
-				deletedAt: null
+				deletedAt: null,
 			},
 			include: {
 				CategoryToProduct: {
 					select: {
-						categoryId: true
-					}
+						categoryId: true,
+					},
 				},
 				Stock: {
 					select: {
 						quantity: true,
-					}
-				}
-			}
-		})
+					},
+				},
+			},
+		});
 
 		if (!product) {
-			throw new HttpException(`The Product was not found for id ${id}`, HttpStatus.BAD_REQUEST);
+			throw new HttpException(
+				`The Product was not found for id ${id}`,
+				HttpStatus.BAD_REQUEST,
+			);
 		}
 
 		return {
-			categories: product.CategoryToProduct.map(c => c.categoryId),
+			categories: product.CategoryToProduct.map((c) => c.categoryId),
 			name: product.name,
 			price: Number(product.price),
 			quantity: Number(product.Stock.quantity),
-		}
+		};
 	}
 
 	async deleteProductById(id: string): Promise<string> {
 		try {
-			const exists = await this.getProductById(id)
+			const exists = await this.getProductById(id);
 
 			if (!exists) {
-				throw new HttpException(`The Product for id ${id} was not found`, HttpStatus.BAD_REQUEST);
+				throw new HttpException(
+					`The Product for id ${id} was not found`,
+					HttpStatus.BAD_REQUEST,
+				);
 			}
 
 			await this.prisma.product.update({
 				where: {
-					id
+					id,
 				},
 				data: {
-					deletedAt: new Date()
-				}
-			})
+					deletedAt: new Date(),
+				},
+			});
 
 			return `The Product for id ${id} was deleted`;
-		}
-		catch (e) {
-			console.error(e)
+		} catch (err) {
+			console.error(err);
 
-			return e;
+			return err;
 		}
 	}
 
-	async updateProductById({ id, data }: { id: string, data: IProduct }): Promise<IProduct> {
+	async updateProductById({
+		id,
+		data,
+	}: {
+		id: string;
+		data: IProduct;
+	}): Promise<IProduct> {
 		try {
-			const productExists = await this.getProductById(id)
+			const productExists = await this.getProductById(id);
 
 			if (!productExists) {
-				throw new HttpException(`The Product for id ${id} was not found`, HttpStatus.BAD_REQUEST);
+				throw new HttpException(
+					`The Product for id ${id} was not found`,
+					HttpStatus.BAD_REQUEST,
+				);
 			}
 
-			const { categories, name, price } = data
+			const { categories, name, price } = data;
 
 			const updatedProduct = await this.prisma.product.update({
 				where: {
-					id
+					id,
 				},
 				data: {
 					name,
@@ -242,48 +258,47 @@ export class PrismaProductsRepository implements ProductsRepository {
 				include: {
 					CategoryToProduct: {
 						select: {
-							categoryId: true
-						}
+							categoryId: true,
+						},
 					},
 					Stock: {
 						select: {
 							quantity: true,
-						}
-					}
-				}
-			})
+						},
+					},
+				},
+			});
 
-			const updatedCategories = []
+			const updatedCategories = [];
 
 			if (categories.length) {
 				await this.prisma.categoryToProduct.deleteMany({
 					where: {
-						productId: id
-					}
-				})
+						productId: id,
+					},
+				});
 
 				for (const category of categories) {
-
 					const categoryExists = await this.prisma.category.findFirst({
 						where: {
 							id: category,
-							deletedAt: null
-						}
-					})
+							deletedAt: null,
+						},
+					});
 
 					if (!categoryExists) {
-						return
+						return;
 					}
 
-					updatedCategories.push(category)
+					updatedCategories.push(category);
 
 					await this.prisma.categoryToProduct.create({
 						data: {
 							id: generateId(),
 							categoryId: category,
 							productId: id,
-						}
-					})
+						},
+					});
 				}
 			}
 
@@ -293,13 +308,12 @@ export class PrismaProductsRepository implements ProductsRepository {
 				price: Number(updatedProduct.price),
 				categories: updatedCategories.length
 					? updatedCategories
-					: updatedProduct.CategoryToProduct.map(c => c.categoryId),
-			}
-		}
-		catch (e) {
-			console.error(e)
+					: updatedProduct.CategoryToProduct.map((c) => c.categoryId),
+			};
+		} catch (err) {
+			console.error(err);
 
-			return e
+			return err;
 		}
 	}
 }
